@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Keahlian & Tools — eSYIM Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080b10;
+      --surface: #0d1117;
+      --card: #111820;
+      --border: rgba(0,230,200,0.12);
+      --accent: #00e6c8;
+      --accent2: #7b61ff;
+      --accent3: #ff6b6b;
+      --text: #e8eaf0;
+      --muted: #6b7a8d;
+      --glow: 0 0 32px rgba(0,230,200,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── ORB ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(0,230,200,0.04); top: -100px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(123,97,255,0.05); bottom: 100px; left: -100px; }
+
+    /* ── CURSOR GLOW ── */
+    .cursor-glow {
+      position: fixed;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,230,200,0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s linear;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: rgba(8,11,16,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text); }
+
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    /* ── MAIN WRAPPER ── */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 8rem 4rem 6rem;
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.1s forwards;
+    }
+    .section-tag::before {
+      content: '';
+      display: inline-block;
+      width: 28px; height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.25s forwards;
+    }
+
+    .page-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 600px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s forwards;
+    }
+
+    /* ── CATEGORY SECTION ── */
+    .category {
+      margin-bottom: 3.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s forwards;
+    }
+    .category:nth-child(1) { animation-delay: 0.5s; }
+    .category:nth-child(2) { animation-delay: 0.65s; }
+    .category:nth-child(3) { animation-delay: 0.8s; }
+    .category:nth-child(4) { animation-delay: 0.95s; }
+
+    .category-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent2);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .category-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── SKILLS GRID ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .skill-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.4rem 1.5rem;
+      transition: all 0.3s;
+      cursor: default;
+    }
+
+    .skill-card:hover {
+      border-color: rgba(0,230,200,0.3);
+      transform: translateY(-4px);
+      box-shadow: var(--glow);
+    }
+
+    .skill-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .skill-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .skill-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 0.8rem;
+    }
+
+    .skill-level {
+      height: 3px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px;
+      margin-top: 0.8rem;
+      overflow: hidden;
+    }
+
+    .skill-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 0%;
+      transition: width 1.2s ease;
+    }
+
+    .skill-pct {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-top: 0.4rem;
+    }
+
+    /* ── BADGE SKILL ── */
+    .skill-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .badge-hardware { background: rgba(0,230,200,0.1); color: var(--accent); }
+    .badge-software { background: rgba(123,97,255,0.1); color: var(--accent2); }
+    .badge-design   { background: rgba(255,107,107,0.1); color: var(--accent3); }
+
+    /* ── SEARCH BAR ── */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.7s 0.45s both;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1rem;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.9rem 3rem 0.9rem 2.8rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input::placeholder { color: var(--muted); }
+
+    .search-input:focus {
+      border-color: rgba(0,230,200,0.45);
+      box-shadow: 0 0 0 3px rgba(0,230,200,0.08);
+    }
+
+    .search-input:focus + .search-icon-wrapper .search-icon { color: var(--accent); }
+
+    .search-clear {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      display: none;
+      transition: color 0.2s;
+    }
+    .search-clear:hover { color: var(--accent3); }
+    .search-clear.visible { display: block; }
+
+    .search-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.6rem;
+      min-height: 1.2em;
+      letter-spacing: 0.04em;
+    }
+    .search-meta span { color: var(--accent); }
+
+    /* Filter tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.7s 0.55s both;
+    }
+
+    .filter-tab {
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-tab:hover {
+      border-color: rgba(0,230,200,0.3);
+      color: var(--text);
+    }
+
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+    .empty-state.show { display: block; }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-family: 'DM Mono', monospace; font-size: 0.82rem; letter-spacing: 0.05em; }
+
+    /* Highlight match */
+    mark {
+      background: rgba(0,230,200,0.25);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* Hide category when all cards inside are hidden */
+    .category.hidden { display: none; }
+
+    /* ── BACK BUTTON ── */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      transition: all 0.3s;
+      margin-top: 3rem;
+    }
+    .back-btn:hover {
+      color: var(--accent);
+      border-color: rgba(0,230,200,0.3);
+      transform: translateY(-2px);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      margin-top: 4rem;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,230,200,0.3); border-radius: 3px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .page-wrapper { padding: 7rem 1.5rem 4rem; }
+      .skills-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <a href="halaman utama.html" class="nav-logo">{ <span>eSYIM</span>Porto }</a>
+  <a href="halaman utama.html#skills" class="nav-back">← Kembali ke Portfolio</a>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <p class="section-tag">Tech Stack</p>
+    <h1>Keahlian &amp; Tools</h1>
+    <p class="page-sub">Kumpulan lengkap keahlian teknis, perangkat lunak, dan alat yang saya kuasai dalam bidang Teknik Elektro Industri.</p>
+  </div>
+
+  <!-- ── SEARCH & FILTER ── -->
+  <div class="search-wrapper">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" class="search-input"
+      placeholder="Cari keahlian atau tools... (contoh: Arduino, PLC, Python)"
+      autocomplete="off"/>
+    <button class="search-clear" id="searchClear" title="Hapus pencarian">✕</button>
+    <div class="search-meta" id="searchMeta"></div>
+  </div>
+
+  <div class="filter-tabs" id="filterTabs">
+    <button class="filter-tab active" data-filter="all">Semua</button>
+    <button class="filter-tab" data-filter="Hardware">⚡ Hardware</button>
+    <button class="filter-tab" data-filter="Software">🖥️ Software</button>
+    <button class="filter-tab" data-filter="Desain">📐 Desain</button>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-state-icon">🔎</div>
+    <p>Tidak ada keahlian yang cocok dengan "<span id="emptyQuery"></span>"</p>
+  </div>
+
+  <!-- ── KATEGORI 1: Hardware & Elektronika ── -->
+  <div class="category">
+    <div class="category-label">⚡ Hardware &amp; Elektronika</div>
+    <div class="skills-grid">
+
+      <div class="skill-card">
+        <div class="skill-badge badge-hardware">Hardware</div>
+        <div class="skill-icon">⚛️</div>
+        <div class="skill-name">Soldering</div>
+        <div class="skill-desc">Penyolderan komponen elektronika THT &amp; SMD pada PCB dengan presisi tinggi.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:92%"></div></div>
+        <div class="skill-pct">92%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-hardware">Hardware</div>
+        <div class="skill-icon">🟢</div>
+        <div class="skill-name">Arduino Uno</div>
+        <div class="skill-desc">Pemrograman mikrokontroler untuk sistem otomasi, sensor, dan aktuator.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:85%"></div></div>
+        <div class="skill-pct">85%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-hardware">Hardware</div>
+        <div class="skill-icon">🐘</div>
+        <div class="skill-name">Eagle PCB</div>
+        <div class="skill-desc">Perancangan skematik dan layout PCB profesional menggunakan Autodesk Eagle.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:80%"></div></div>
+        <div class="skill-pct">80%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-hardware">Hardware</div>
+        <div class="skill-icon">🔌</div>
+        <div class="skill-name">Wiring &amp; Instalasi</div>
+        <div class="skill-desc">Instalasi panel listrik, wiring diagram, dan pengkabelan sistem industri.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:83%"></div></div>
+        <div class="skill-pct">83%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── KATEGORI 2: Otomasi & Kontrol Industri ── -->
+  <div class="category">
+    <div class="category-label">🏭 Otomasi &amp; Kontrol Industri</div>
+    <div class="skills-grid">
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">🟨</div>
+        <div class="skill-name">CX-Programmer</div>
+        <div class="skill-desc">Pemrograman PLC Omron menggunakan ladder diagram untuk sistem kontrol industri.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:90%"></div></div>
+        <div class="skill-pct">90%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">☁️</div>
+        <div class="skill-name">HMI (Human-Machine Interface)</div>
+        <div class="skill-desc">Perancangan antarmuka operator untuk monitoring dan kontrol sistem industri secara real-time.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:75%"></div></div>
+        <div class="skill-pct">75%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">🎨</div>
+        <div class="skill-name">FluidSim</div>
+        <div class="skill-desc">Simulasi sistem pneumatik dan hidrolik untuk perancangan sistem otomasi pabrik.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:95%"></div></div>
+        <div class="skill-pct">95%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">⚙️</div>
+        <div class="skill-name">SCADA</div>
+        <div class="skill-desc">Dasar-dasar sistem supervisory control and data acquisition untuk monitoring industri.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:65%"></div></div>
+        <div class="skill-pct">65%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── KATEGORI 3: Desain & Simulasi ── -->
+  <div class="category">
+    <div class="category-label">📐 Desain &amp; Simulasi</div>
+    <div class="skills-grid">
+
+      <div class="skill-card">
+        <div class="skill-badge badge-design">Desain</div>
+        <div class="skill-icon">🔥</div>
+        <div class="skill-name">AutoCAD</div>
+        <div class="skill-desc">Pembuatan gambar teknik, denah, dan diagram wiring dalam format standar industri.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:82%"></div></div>
+        <div class="skill-pct">82%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">🐙</div>
+        <div class="skill-name">Matlab</div>
+        <div class="skill-desc">Analisis sinyal, simulasi sistem kontrol, dan pemrosesan data teknik menggunakan Matlab &amp; Simulink.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:88%"></div></div>
+        <div class="skill-pct">88%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">📊</div>
+        <div class="skill-name">Proteus</div>
+        <div class="skill-desc">Simulasi rangkaian elektronika dan perancangan PCB virtual sebelum implementasi fisik.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:72%"></div></div>
+        <div class="skill-pct">72%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">🔬</div>
+        <div class="skill-name">Multisim</div>
+        <div class="skill-desc">Simulasi dan analisis rangkaian elektronika analog dan digital secara interaktif.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:70%"></div></div>
+        <div class="skill-pct">70%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── KATEGORI 4: IoT & Pemrograman ── -->
+  <div class="category">
+    <div class="category-label">🌐 IoT &amp; Pemrograman</div>
+    <div class="skills-grid">
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">📡</div>
+        <div class="skill-name">ESP32 / ESP8266</div>
+        <div class="skill-desc">Pengembangan sistem IoT berbasis Wi-Fi untuk monitoring sensor dan kontrol jarak jauh.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:78%"></div></div>
+        <div class="skill-pct">78%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">💻</div>
+        <div class="skill-name">C / C++</div>
+        <div class="skill-desc">Pemrograman embedded system untuk mikrokontroler Arduino, AVR, dan ARM.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:75%"></div></div>
+        <div class="skill-pct">75%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">🐍</div>
+        <div class="skill-name">Python (Dasar)</div>
+        <div class="skill-desc">Scripting untuk analisis data teknik, komunikasi serial, dan otomasi pengujian sederhana.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:60%"></div></div>
+        <div class="skill-pct">60%</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-badge badge-software">Software</div>
+        <div class="skill-icon">☁️</div>
+        <div class="skill-name">MQTT / Node-RED</div>
+        <div class="skill-desc">Protokol komunikasi IoT dan pembuatan alur data visual untuk sistem monitoring industri.</div>
+        <div class="skill-level"><div class="skill-fill" style="--w:68%"></div></div>
+        <div class="skill-pct">68%</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tombol kembali -->
+  <a href="halaman utama.html#skills" class="back-btn">← Kembali ke Portfolio</a>
+
+</div><!-- end page-wrapper -->
+
+<footer>
+  <p>© 2026 eSYIM · Dibuat dengan ♥ dan banyak ☕</p>
+</footer>
+
+<script>
+  // ── Cursor glow ──
+  const glow = document.getElementById('cursorGlow');
+  document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top  = e.clientY + 'px';
+  });
+
+  // ── Animate skill bars ──
+  function animateBars(cards) {
+    cards.forEach(card => {
+      const fill = card.querySelector('.skill-fill');
+      if (!fill) return;
+      fill.style.width = '0%';
+      setTimeout(() => {
+        const w = fill.style.getPropertyValue('--w') ||
+                  fill.getAttribute('style').match(/--w:([\d%]+)/)?.[1];
+        if (w) fill.style.width = w;
+      }, 100);
+    });
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => animateBars(document.querySelectorAll('.skill-card')), 300);
+  });
+
+  // ── Search & Filter Logic ──
+  const searchInput  = document.getElementById('searchInput');
+  const searchClear  = document.getElementById('searchClear');
+  const searchMeta   = document.getElementById('searchMeta');
+  const emptyState   = document.getElementById('emptyState');
+  const emptyQuery   = document.getElementById('emptyQuery');
+  const filterTabs   = document.querySelectorAll('.filter-tab');
+  const categories   = document.querySelectorAll('.category');
+  const allCards     = document.querySelectorAll('.skill-card');
+
+  let activeFilter = 'all';
+
+  // Store original text for each card (for highlight restore)
+  allCards.forEach(card => {
+    const nameEl = card.querySelector('.skill-name');
+    const descEl = card.querySelector('.skill-desc');
+    card.dataset.origName = nameEl.innerHTML;
+    card.dataset.origDesc = descEl.innerHTML;
+    // Store badge type text
+    const badge = card.querySelector('.skill-badge');
+    card.dataset.badgeType = badge ? badge.textContent.trim() : '';
+  });
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+  }
+
+  function applySearch() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    // Clear button visibility
+    searchClear.classList.toggle('visible', query.length > 0);
+
+    allCards.forEach(card => {
+      const name      = card.dataset.origName.toLowerCase().replace(/<[^>]+>/g, '');
+      const desc      = card.dataset.origDesc.toLowerCase().replace(/<[^>]+>/g, '');
+      const badgeType = card.dataset.badgeType.toLowerCase();
+
+      const matchesSearch = !query || name.includes(query) || desc.includes(query) || badgeType.includes(query);
+      const matchesFilter = activeFilter === 'all' || card.dataset.badgeType === activeFilter;
+
+      const visible = matchesSearch && matchesFilter;
+      card.style.display = visible ? '' : 'none';
+
+      // Highlight matching text
+      const nameEl = card.querySelector('.skill-name');
+      const descEl = card.querySelector('.skill-desc');
+      if (visible) {
+        nameEl.innerHTML = highlight(card.dataset.origName, query);
+        descEl.innerHTML = highlight(card.dataset.origDesc, query);
+        visibleCount++;
+        animateBars([card]);
+      } else {
+        nameEl.innerHTML = card.dataset.origName;
+        descEl.innerHTML = card.dataset.origDesc;
+      }
+    });
+
+    // Hide empty categories
+    categories.forEach(cat => {
+      const visibleCards = [...cat.querySelectorAll('.skill-card')]
+        .filter(c => c.style.display !== 'none');
+      cat.classList.toggle('hidden', visibleCards.length === 0);
+    });
+
+    // Empty state
+    const noResults = visibleCount === 0;
+    emptyState.classList.toggle('show', noResults);
+    if (noResults) emptyQuery.textContent = searchInput.value.trim();
+
+    // Meta info
+    if (query || activeFilter !== 'all') {
+      searchMeta.innerHTML = `Menampilkan <span>${visibleCount}</span> dari <span>${allCards.length}</span> keahlian`;
+    } else {
+      searchMeta.innerHTML = '';
+    }
+  }
+
+  // Input event
+  searchInput.addEventListener('input', applySearch);
+
+  // Clear button
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchInput.focus();
+    applySearch();
+  });
+
+  // Keyboard shortcut: press "/" to focus search
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.value = '';
+      applySearch();
+      searchInput.blur();
+    }
+  });
+
+  // Filter tabs
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeFilter = tab.dataset.filter;
+      applySearch();
+    });
+  });
+</script>
+</body>
+</html>
