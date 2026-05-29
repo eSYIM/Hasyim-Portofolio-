@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sertifikat — eSYIM Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #060910;
+      --surface: #0d1117;
+      --card:    #0f1820;
+      --border:  rgba(0,230,200,0.1);
+      --accent:  #00e6c8;
+      --accent2: #7b61ff;
+      --accent3: #ff6b6b;
+      --accent4: #f5a623;
+      --text:    #e8eaf0;
+      --muted:   #5c6b7d;
+      --glow:    0 0 32px rgba(0,230,200,0.18);
+
+      /* tier colors */
+      --tier-standard:  #4e6070;
+      --tier-verified:  #00b4d8;
+      --tier-elite:     #7b61ff;
+      --tier-legendary: #f5a623;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE ── */
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.5;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    }
+
+    /* ── ORBS ── */
+    .orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+    .orb-1 { width:700px; height:700px; top:-200px; right:-200px; background:rgba(0,230,200,0.035); }
+    .orb-2 { width:500px; height:500px; bottom:0; left:-150px; background:rgba(123,97,255,0.04); }
+    .orb-3 { width:350px; height:350px; top:40%; left:30%; background:rgba(245,166,35,0.02); }
+
+    /* ── CURSOR ── */
+    .cursor-glow {
+      position:fixed; width:280px; height:280px; border-radius:50%;
+      background:radial-gradient(circle,rgba(0,230,200,0.04) 0%,transparent 65%);
+      pointer-events:none; z-index:0; transform:translate(-50%,-50%);
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.1rem 4rem;
+      background:rgba(6,9,16,0.8);
+      backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.25rem;
+      letter-spacing:-0.02em; color:var(--accent); text-decoration:none;
+    }
+    .nav-logo span { color:var(--text); }
+    .nav-right { display:flex; align-items:center; gap:1.8rem; }
+    .nav-count {
+      font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted);
+      letter-spacing:0.08em; display:flex; align-items:center; gap:0.4rem;
+    }
+    .nav-count em { color:var(--accent); font-style:normal; font-weight:600; }
+    .nav-back {
+      font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--muted);
+      text-decoration:none; letter-spacing:0.08em; text-transform:uppercase;
+      transition:color 0.2s;
+    }
+    .nav-back:hover { color:var(--accent); }
+
+    /* ── PAGE ── */
+    .page { position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:8rem 4rem 6rem; }
+
+    /* ── HEADER ── */
+    .section-tag {
+      font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--accent);
+      letter-spacing:0.2em; text-transform:uppercase; margin-bottom:0.9rem;
+      display:flex; align-items:center; gap:0.6rem;
+      opacity:0; animation:fadeUp 0.7s 0.1s forwards;
+    }
+    .section-tag::before { content:''; width:28px; height:1px; background:var(--accent); }
+
+    h1 {
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size:clamp(2.8rem,5.5vw,4.5rem);
+      line-height:1.05; letter-spacing:-0.035em; margin-bottom:0.8rem;
+      opacity:0; animation:fadeUp 0.7s 0.2s forwards;
+    }
+    h1 em { font-style:normal; color:var(--accent); }
+    .page-sub {
+      color:var(--muted); font-size:1rem; line-height:1.7; max-width:520px;
+      opacity:0; animation:fadeUp 0.7s 0.35s forwards;
+    }
+
+    /* ── VAULT STATS ── */
+    .vault-stats {
+      display:flex; gap:0; margin:2.8rem 0 3.2rem;
+      border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      background:var(--card);
+      opacity:0; animation:fadeUp 0.7s 0.45s forwards;
+    }
+    .vault-stat {
+      flex:1; padding:1.5rem 2rem; text-align:center;
+      border-right:1px solid var(--border); position:relative; overflow:hidden;
+    }
+    .vault-stat:last-child { border-right:none; }
+    .vault-stat::before {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+      opacity:0; transition:opacity 0.3s;
+    }
+    .vault-stat:hover::before { opacity:1; }
+    .stat-standard::before  { background:var(--tier-standard); }
+    .stat-verified::before  { background:var(--tier-verified); }
+    .stat-elite::before     { background:var(--tier-elite); }
+    .stat-legendary::before { background:linear-gradient(90deg,var(--tier-legendary),#ff8c42); }
+    .stat-total::before     { background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+    .stat-n {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:2.2rem;
+      line-height:1; margin-bottom:0.3rem;
+    }
+    .stat-standard .stat-n  { color:var(--tier-standard); }
+    .stat-verified .stat-n  { color:var(--tier-verified); }
+    .stat-elite .stat-n     { color:var(--tier-elite); }
+    .stat-legendary .stat-n { color:var(--tier-legendary); }
+    .stat-total .stat-n     { color:var(--accent); }
+    .stat-label {
+      font-family:'DM Mono',monospace; font-size:0.65rem;
+      text-transform:uppercase; letter-spacing:0.12em; color:var(--muted);
+    }
+    .stat-tier-dot {
+      width:8px; height:8px; border-radius:50%; margin:0 auto 0.5rem;
+    }
+
+    /* ── TIER LEGEND ── */
+    .tier-legend {
+      display:flex; gap:1.2rem; flex-wrap:wrap; margin-bottom:2.5rem;
+      opacity:0; animation:fadeUp 0.7s 0.55s forwards;
+    }
+    .tier-pill {
+      display:flex; align-items:center; gap:0.5rem;
+      padding:0.35rem 0.9rem; border-radius:20px; border:1px solid;
+      font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.06em;
+      cursor:help;
+    }
+    .tier-pill-dot { width:7px; height:7px; border-radius:50%; }
+    .pill-standard  { border-color:rgba(78,96,112,0.4); color:var(--tier-standard); }
+    .pill-verified  { border-color:rgba(0,180,216,0.3); color:var(--tier-verified); }
+    .pill-elite     { border-color:rgba(123,97,255,0.3); color:var(--tier-elite); }
+    .pill-legendary { border-color:rgba(245,166,35,0.4); color:var(--tier-legendary); }
+    .pill-legend    { color:var(--muted); font-size:0.65rem; align-self:center; padding-left:0.3rem; }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display:flex; flex-direction:column; gap:1rem; margin-bottom:2.8rem;
+      opacity:0; animation:fadeUp 0.7s 0.62s forwards;
+    }
+    .ctrl-row { display:flex; gap:0.8rem; align-items:center; }
+    .search-wrap { position:relative; flex:1; }
+    .search-ico {
+      position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+      color:var(--muted); pointer-events:none; font-size:0.9rem;
+    }
+    .search-input {
+      width:100%; padding:0.88rem 3rem 0.88rem 2.6rem;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:10px; color:var(--text);
+      font-family:'DM Mono',monospace; font-size:0.84rem;
+      letter-spacing:0.04em; outline:none;
+      transition:border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-input::placeholder { color:var(--muted); }
+    .search-input:focus { border-color:rgba(0,230,200,0.4); box-shadow:0 0 0 3px rgba(0,230,200,0.07); }
+    .search-clear {
+      position:absolute; right:0.9rem; top:50%; transform:translateY(-50%);
+      background:none; border:none; color:var(--muted); cursor:pointer;
+      font-size:0.85rem; padding:0.25rem 0.4rem; border-radius:4px;
+      display:none; transition:color 0.2s;
+    }
+    .search-clear:hover { color:var(--accent3); }
+    .search-clear.show { display:block; }
+
+    /* view toggle */
+    .view-toggle {
+      display:flex; gap:0; border:1px solid var(--border); border-radius:8px; overflow:hidden;
+    }
+    .view-btn {
+      padding:0.7rem 1rem; background:none; border:none; color:var(--muted);
+      cursor:pointer; font-size:1rem; transition:all 0.2s;
+    }
+    .view-btn.active { background:rgba(0,230,200,0.1); color:var(--accent); }
+
+    /* sort */
+    .sort-sel {
+      padding:0.78rem 1.1rem; border-radius:10px;
+      background:var(--card); border:1px solid var(--border);
+      color:var(--muted); font-family:'DM Mono',monospace;
+      font-size:0.75rem; cursor:pointer; outline:none; letter-spacing:0.04em;
+      transition:border-color 0.2s;
+    }
+    .sort-sel:focus { border-color:rgba(0,230,200,0.3); }
+
+    /* category tabs */
+    .cat-tabs { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .cat-tab {
+      padding:0.4rem 1.1rem; border-radius:20px; border:1px solid var(--border);
+      background:transparent; color:var(--muted);
+      font-family:'DM Mono',monospace; font-size:0.7rem;
+      letter-spacing:0.06em; cursor:pointer; transition:all 0.22s;
+      white-space:nowrap;
+    }
+    .cat-tab:hover { border-color:rgba(0,230,200,0.28); color:var(--text); }
+    .cat-tab.active { background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600; }
+
+    .search-meta {
+      font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted); letter-spacing:0.04em; min-height:1.1em;
+    }
+    .search-meta em { color:var(--accent); font-style:normal; }
+
+    /* ── GRID VIEW ── */
+    .certs-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+      gap:1.4rem;
+    }
+
+    /* ── LIST VIEW ── */
+    .certs-list { display:flex; flex-direction:column; gap:0.9rem; }
+
+    /* ── CERT CARD (flip) ── */
+    .cert-card {
+      perspective:1200px;
+      height:200px;
+      cursor:pointer;
+      opacity:0; animation:fadeUp 0.55s forwards;
+    }
+    .cert-card:nth-child(1)  { animation-delay:0.05s; }
+    .cert-card:nth-child(2)  { animation-delay:0.10s; }
+    .cert-card:nth-child(3)  { animation-delay:0.15s; }
+    .cert-card:nth-child(4)  { animation-delay:0.20s; }
+    .cert-card:nth-child(5)  { animation-delay:0.25s; }
+    .cert-card:nth-child(6)  { animation-delay:0.30s; }
+    .cert-card:nth-child(7)  { animation-delay:0.35s; }
+    .cert-card:nth-child(8)  { animation-delay:0.40s; }
+    .cert-card:nth-child(9)  { animation-delay:0.45s; }
+    .cert-card:nth-child(10) { animation-delay:0.50s; }
+    .cert-card:nth-child(n+11){ animation-delay:0.55s; }
+
+    .cert-inner {
+      position:relative; width:100%; height:100%;
+      transform-style:preserve-3d;
+      transition:transform 0.65s cubic-bezier(0.4,0.2,0.2,1);
+    }
+    .cert-card:hover .cert-inner,
+    .cert-card.flipped .cert-inner { transform:rotateY(180deg); }
+
+    .cert-front, .cert-back {
+      position:absolute; inset:0; border-radius:14px;
+      backface-visibility:hidden; overflow:hidden;
+      border:1px solid var(--border);
+    }
+
+    /* ── FRONT ── */
+    .cert-front {
+      background:var(--card);
+      display:flex; flex-direction:column; justify-content:space-between;
+      padding:1.4rem 1.5rem;
+      transition:border-color 0.3s;
+    }
+    .cert-front::after {
+      /* holographic shimmer strip */
+      content:'';
+      position:absolute; top:0; left:-60%;
+      width:40%; height:100%;
+      background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.04) 50%,transparent 60%);
+      transform:skewX(-15deg);
+      transition:left 0.6s ease;
+      pointer-events:none;
+    }
+    .cert-card:hover .cert-front::after { left:130%; }
+
+    /* tier left border */
+    .cert-front::before {
+      content:''; position:absolute; top:0; left:0;
+      width:3px; height:100%; border-radius:14px 0 0 14px;
+    }
+    .tier-standard .cert-front::before  { background:var(--tier-standard); }
+    .tier-verified .cert-front::before  { background:var(--tier-verified); box-shadow:0 0 12px var(--tier-verified); }
+    .tier-elite    .cert-front::before  { background:var(--tier-elite); box-shadow:0 0 14px var(--tier-elite); }
+    .tier-legendary .cert-front::before { background:linear-gradient(180deg,var(--tier-legendary),#ff8c42); box-shadow:0 0 18px var(--tier-legendary); }
+
+    /* legendary glow ring */
+    .tier-legendary .cert-front {
+      border-color:rgba(245,166,35,0.25);
+      background:linear-gradient(135deg,#0f1820 0%,#1a1208 100%);
+    }
+    .tier-elite .cert-front    { border-color:rgba(123,97,255,0.2); }
+    .tier-verified .cert-front { border-color:rgba(0,180,216,0.18); }
+
+    .cert-top { display:flex; align-items:flex-start; justify-content:space-between; gap:0.8rem; }
+    .cert-icon-wrap {
+      width:46px; height:46px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; flex-shrink:0;
+      position:relative; overflow:hidden;
+    }
+    .cert-icon-wrap::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent);
+    }
+    .icon-standard  { background:rgba(78,96,112,0.2); }
+    .icon-verified  { background:rgba(0,180,216,0.15); }
+    .icon-elite     { background:rgba(123,97,255,0.15); }
+    .icon-legendary { background:rgba(245,166,35,0.15); }
+
+    .cert-tier-badge {
+      font-family:'DM Mono',monospace; font-size:0.58rem;
+      letter-spacing:0.12em; text-transform:uppercase;
+      padding:0.22rem 0.55rem; border-radius:4px; font-weight:700;
+      border:1px solid;
+    }
+    .badge-standard  { color:var(--tier-standard); border-color:rgba(78,96,112,0.35); background:rgba(78,96,112,0.1); }
+    .badge-verified  { color:var(--tier-verified); border-color:rgba(0,180,216,0.3); background:rgba(0,180,216,0.08); }
+    .badge-elite     { color:var(--tier-elite); border-color:rgba(123,97,255,0.3); background:rgba(123,97,255,0.1); }
+    .badge-legendary { color:var(--tier-legendary); border-color:rgba(245,166,35,0.35); background:rgba(245,166,35,0.1); }
+
+    .cert-bottom {}
+    .cert-name {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:0.96rem;
+      line-height:1.3; margin-bottom:0.35rem; color:var(--text);
+    }
+    .cert-issuer { font-size:0.8rem; color:var(--muted); margin-bottom:0.6rem; }
+    .cert-foot { display:flex; align-items:center; justify-content:space-between; }
+    .cert-date {
+      font-family:'DM Mono',monospace; font-size:0.68rem;
+      color:var(--muted); letter-spacing:0.05em;
+    }
+    .cert-cat-tag {
+      font-family:'DM Mono',monospace; font-size:0.62rem;
+      padding:0.15rem 0.5rem; border-radius:3px;
+      letter-spacing:0.06em;
+    }
+    .ctag-akademik  { background:rgba(0,230,200,0.08); color:var(--accent); }
+    .ctag-industri  { background:rgba(123,97,255,0.08); color:var(--accent2); }
+    .ctag-iot       { background:rgba(0,180,216,0.08); color:#00b4d8; }
+    .ctag-kompetisi { background:rgba(245,166,35,0.1); color:var(--accent4); }
+    .ctag-course    { background:rgba(255,107,107,0.08); color:var(--accent3); }
+
+    /* flip hint */
+    .cert-flip-hint {
+      position:absolute; bottom:0.7rem; right:0.8rem;
+      font-family:'DM Mono',monospace; font-size:0.58rem;
+      color:var(--muted); opacity:0; letter-spacing:0.06em;
+      transition:opacity 0.25s;
+    }
+    .cert-card:hover .cert-flip-hint { opacity:0.5; }
+
+    /* ── BACK ── */
+    .cert-back {
+      background:linear-gradient(135deg,#0c1620 0%,#0a1218 100%);
+      transform:rotateY(180deg);
+      display:flex; flex-direction:column; justify-content:center;
+      padding:1.5rem; gap:0.7rem;
+    }
+    .back-id {
+      font-family:'DM Mono',monospace; font-size:0.62rem;
+      color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;
+    }
+    .back-id span { color:var(--accent); }
+    .back-desc { font-size:0.82rem; color:var(--muted); line-height:1.6; }
+    .back-skills { display:flex; gap:0.4rem; flex-wrap:wrap; }
+    .back-skill {
+      font-family:'DM Mono',monospace; font-size:0.6rem;
+      padding:0.15rem 0.5rem; border-radius:3px;
+      background:rgba(0,230,200,0.07); color:var(--accent);
+      border:1px solid rgba(0,230,200,0.15); letter-spacing:0.04em;
+    }
+    .back-verify {
+      display:flex; align-items:center; gap:0.5rem;
+      font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--muted);
+      margin-top:0.3rem;
+    }
+    .verify-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+    /* ── LIST CARD ── */
+    .cert-list-item {
+      display:flex; align-items:center; gap:1.2rem;
+      padding:1rem 1.4rem; border-radius:12px;
+      background:var(--card); border:1px solid var(--border);
+      transition:all 0.25s; opacity:0; animation:fadeUp 0.5s forwards;
+      cursor:default;
+    }
+    .cert-list-item:hover { border-color:rgba(0,230,200,0.2); transform:translateX(4px); }
+    .list-icon {
+      width:40px; height:40px; border-radius:8px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+    }
+    .list-main { flex:1; min-width:0; }
+    .list-name {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .list-issuer { font-size:0.78rem; color:var(--muted); margin-top:0.1rem; }
+    .list-right { display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; flex-shrink:0; }
+    .list-date { font-family:'DM Mono',monospace; font-size:0.67rem; color:var(--muted); }
+
+    /* ── EMPTY ── */
+    .empty-state {
+      display:none; text-align:center; padding:5rem 2rem;
+      grid-column:1/-1;
+    }
+    .empty-state.show { display:block; }
+    .empty-icon { font-size:3rem; margin-bottom:1rem; opacity:0.4; }
+    .empty-txt { font-family:'DM Mono',monospace; font-size:0.8rem; color:var(--muted); letter-spacing:0.04em; }
+
+    /* ── HIGHLIGHT ── */
+    mark { background:rgba(0,230,200,0.2); color:var(--accent); border-radius:2px; padding:0 2px; }
+
+    /* ── BACK BTN ── */
+    .back-btn {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.85rem 2rem; border-radius:8px;
+      border:1px solid var(--border); color:var(--muted);
+      text-decoration:none; font-family:'DM Mono',monospace;
+      font-size:0.78rem; letter-spacing:0.06em; transition:all 0.3s;
+      margin-top:3.5rem;
+    }
+    .back-btn:hover { color:var(--accent); border-color:rgba(0,230,200,0.3); transform:translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer {
+      position:relative; z-index:1; text-align:center;
+      padding:2rem; border-top:1px solid var(--border);
+      color:var(--muted); font-family:'DM Mono',monospace;
+      font-size:0.7rem; letter-spacing:0.05em; margin-top:4rem;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,0.75); backdrop-filter:blur(10px);
+      display:none; align-items:center; justify-content:center; padding:2rem;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal-box {
+      background:linear-gradient(145deg,#0d1a26,#0a1218);
+      border:1px solid rgba(0,230,200,0.2); border-radius:20px;
+      max-width:520px; width:100%;
+      animation:modalIn 0.3s ease;
+      overflow:hidden;
+    }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.94) translateY(16px)} to{opacity:1;transform:none} }
+    .modal-head {
+      padding:2rem 2rem 1.5rem;
+      border-bottom:1px solid var(--border);
+      display:flex; gap:1.2rem; align-items:flex-start; position:relative;
+    }
+    .modal-icon { width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.7rem; flex-shrink:0; }
+    .modal-header-text { flex:1; }
+    .modal-tier-badge { margin-bottom:0.5rem; }
+    .modal-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.25rem; line-height:1.2; }
+    .modal-issuer { color:var(--muted); font-size:0.85rem; margin-top:0.25rem; }
+    .modal-close {
+      position:absolute; top:1.2rem; right:1.2rem;
+      background:rgba(255,255,255,0.05); border:1px solid var(--border);
+      color:var(--muted); border-radius:8px; width:32px; height:32px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:0.9rem; transition:all 0.2s;
+    }
+    .modal-close:hover { color:var(--accent3); background:rgba(255,107,107,0.1); }
+    .modal-body { padding:1.8rem 2rem; }
+    .modal-row {
+      display:flex; gap:1.5rem; margin-bottom:1.2rem; flex-wrap:wrap;
+    }
+    .modal-meta-item {
+      font-family:'DM Mono',monospace; font-size:0.72rem;
+      color:var(--muted); display:flex; align-items:center; gap:0.4rem;
+    }
+    .modal-meta-item strong { color:var(--text); }
+    .modal-desc { color:var(--muted); line-height:1.75; font-size:0.9rem; margin-bottom:1.4rem; }
+    .modal-skills-title { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--accent); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.7rem; }
+    .modal-skills { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .modal-skill { font-family:'DM Mono',monospace; font-size:0.68rem; padding:0.2rem 0.6rem; border-radius:4px; background:rgba(0,230,200,0.07); color:var(--accent); border:1px solid rgba(0,230,200,0.18); letter-spacing:0.04em; }
+    .modal-actions { display:flex; gap:0.8rem; }
+    .btn-primary {
+      display:inline-flex; align-items:center; gap:0.4rem;
+      padding:0.7rem 1.6rem; border-radius:8px;
+      background:var(--accent); color:var(--bg);
+      font-family:'DM Mono',monospace; font-size:0.78rem;
+      font-weight:600; letter-spacing:0.06em; text-decoration:none; transition:all 0.3s;
+    }
+    .btn-primary:hover { box-shadow:var(--glow); transform:translateY(-2px); }
+    .btn-outline {
+      display:inline-flex; align-items:center; gap:0.4rem;
+      padding:0.7rem 1.6rem; border-radius:8px;
+      border:1px solid var(--border); color:var(--muted);
+      font-family:'DM Mono',monospace; font-size:0.78rem;
+      letter-spacing:0.06em; text-decoration:none; transition:all 0.3s;
+    }
+    .btn-outline:hover { border-color:rgba(0,230,200,0.3); color:var(--accent); }
+
+    /* ── ANIMS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(22px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:rgba(0,230,200,0.28); border-radius:3px; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px) {
+      nav { padding:1rem 1.5rem; }
+      .nav-count { display:none; }
+      .page { padding:7rem 1.4rem 4rem; }
+      .certs-grid { grid-template-columns:1fr; }
+      .vault-stats { flex-wrap:wrap; }
+      .vault-stat { flex:1 1 40%; border-bottom:1px solid var(--border); }
+      .sort-sel { display:none; }
+      .view-toggle { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <a href="untitled.html" class="nav-logo">{ <span>eSYIM</span>Porto }</a>
+  <div class="nav-right">
+    <div class="nav-count">Vault: <em id="navCount">12</em> Kredensial</div>
+    <a href="halamanutama.html#certificates" class="nav-back">← Kembali</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="page">
+
+  <!-- Header -->
+  <p class="section-tag">Kredensial</p>
+  <h1>Credential <em>Vault</em></h1>
+  <p class="page-sub">Koleksi lengkap sertifikat, penghargaan, dan kompetensi — dari pelatihan industri, kompetisi, hingga kursus online. Klik kartu untuk melihat detail.</p>
+
+  <!-- Vault Stats -->
+  <div class="vault-stats" id="vaultStats">
+    <div class="vault-stat stat-total">
+      <div class="stat-n" id="statTotal">12</div>
+      <div class="stat-label">Total Kredensial</div>
+    </div>
+    <div class="vault-stat stat-legendary">
+      <div class="stat-tier-dot" style="background:var(--tier-legendary)"></div>
+      <div class="stat-n" id="statLegendary">2</div>
+      <div class="stat-label">Legendary</div>
+    </div>
+    <div class="vault-stat stat-elite">
+      <div class="stat-tier-dot" style="background:var(--tier-elite)"></div>
+      <div class="stat-n" id="statElite">3</div>
+      <div class="stat-label">Elite</div>
+    </div>
+    <div class="vault-stat stat-verified">
+      <div class="stat-tier-dot" style="background:var(--tier-verified)"></div>
+      <div class="stat-n" id="statVerified">4</div>
+      <div class="stat-label">Verified</div>
+    </div>
+    <div class="vault-stat stat-standard">
+      <div class="stat-tier-dot" style="background:var(--tier-standard)"></div>
+      <div class="stat-n" id="statStandard">3</div>
+      <div class="stat-label">Standard</div>
+    </div>
+  </div>
+
+  <!-- Tier Legend -->
+  <div class="tier-legend">
+    <span class="tier-pill pill-legendary"><span class="tier-pill-dot" style="background:var(--tier-legendary)"></span>LEGENDARY</span>
+    <span class="tier-pill pill-elite"><span class="tier-pill-dot" style="background:var(--tier-elite)"></span>ELITE</span>
+    <span class="tier-pill pill-verified"><span class="tier-pill-dot" style="background:var(--tier-verified)"></span>VERIFIED</span>
+    <span class="tier-pill pill-standard"><span class="tier-pill-dot" style="background:var(--tier-standard)"></span>STANDARD</span>
+    <span class="pill-legend">— Hover kartu untuk flip detail · Klik untuk modal lengkap</span>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="ctrl-row">
+      <div class="search-wrap">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="searchInput" class="search-input"
+          placeholder="Cari sertifikat, lembaga, atau skill..." autocomplete="off"/>
+        <button class="search-clear" id="searchClear">✕</button>
+      </div>
+      <select class="sort-sel" id="sortSel">
+        <option value="default">Default</option>
+        <option value="newest">Terbaru</option>
+        <option value="oldest">Terlama</option>
+        <option value="tier">Tier ↓</option>
+        <option value="name">Nama A→Z</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridViewBtn" title="Grid View">⊞</button>
+        <button class="view-btn" id="listViewBtn" title="List View">≡</button>
+      </div>
+    </div>
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-tab active" data-cat="Semua">Semua</button>
+      <button class="cat-tab" data-cat="Akademik">🎓 Akademik</button>
+      <button class="cat-tab" data-cat="Industri">🏭 Teknik Industri</button>
+      <button class="cat-tab" data-cat="IoT">📡 IoT &amp; Embedded</button>
+      <button class="cat-tab" data-cat="Kompetisi">🏆 Kompetisi</button>
+      <button class="cat-tab" data-cat="Course">📚 Online Course</button>
+    </div>
+    <div class="search-meta" id="searchMeta"></div>
+  </div>
+
+  <!-- Container -->
+  <div class="certs-grid" id="certsContainer">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🗄️</div>
+      <p class="empty-txt">Tidak ada kredensial yang cocok.<br/>Coba kata kunci lain.</p>
+    </div>
+  </div>
+
+  <a href="halamanutama.html#certificates" class="back-btn">← Kembali ke Portfolio</a>
+</div>
+
+<footer>
+  <p>© 2026 eSYIM · Mukhamad Hasyim · Teknik Elektro Industri PENS</p>
+</footer>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-head">
+      <div class="modal-icon" id="mIcon"></div>
+      <div class="modal-header-text">
+        <div class="modal-tier-badge" id="mTierBadge"></div>
+        <div class="modal-title" id="mTitle"></div>
+        <div class="modal-issuer" id="mIssuer"></div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-row" id="mMeta"></div>
+      <div class="modal-desc" id="mDesc"></div>
+      <div class="modal-skills-title">Kompetensi Terkait</div>
+      <div class="modal-skills" id="mSkills"></div>
+      <div class="modal-actions" id="mActions"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─────────── DATA ─────────── */
+const TIER_ORDER = { legendary:0, elite:1, verified:2, standard:3 };
+
+const certs = [
+  {
+    id: 0,
+    icon: '🥇',
+    name: 'Juara 1 LKS Elektronika Industri',
+    issuer: 'Dinas Pendidikan Jawa Timur',
+    date: 'Nov 2023',
+    year: 2023,
+    cat: 'Kompetisi',
+    tier: 'legendary',
+    id_num: 'LKS-JATIM-2023-0412',
+    desc: 'Meraih juara pertama Lomba Kompetensi Siswa (LKS) bidang Elektronika Industri tingkat Provinsi Jawa Timur. Berkompetisi dengan peserta terbaik dari 38 kabupaten/kota se-Jatim.',
+    skills: ['Rangkaian Elektronika','PLC Dasar','Wiring Panel','Troubleshooting'],
+    link: null
+  },
+  {
+    id: 1,
+    icon: '🎓',
+    name: 'Ujian Kompetensi Keahlian Teknik Elektronika Industri',
+    issuer: 'BNSP / SMK Negeri 2 Pasuruan',
+    date: 'Apr 2024',
+    year: 2024,
+    cat: 'Akademik',
+    tier: 'legendary',
+    id_num: 'BNSP-UKK-2024-TEI-0089',
+    desc: 'Sertifikasi kompetensi nasional dari Badan Nasional Sertifikasi Profesi (BNSP) bidang Teknik Elektronika Industri. Mencakup uji praktik pemasangan, pemrograman, dan troubleshooting sistem elektronika industri.',
+    skills: ['Instalasi Elektronika','PLC','Wiring','K3 Listrik','Instrumentasi'],
+    link: null
+  },
+  {
+    id: 2,
+    icon: '🏭',
+    name: 'Pelatihan PLC Dasar — Omron Sysmac',
+    issuer: 'PT. Omron Manufacturing Indonesia',
+    date: 'Agu 2023',
+    year: 2023,
+    cat: 'Industri',
+    tier: 'elite',
+    id_num: 'OMRON-PLC-2023-ID-7721',
+    desc: 'Pelatihan intensif 3 hari pemrograman PLC Omron Sysmac CP1E menggunakan CX-Programmer, mencakup ladder diagram, function block, dan integrasi dengan perangkat I/O industri.',
+    skills: ['CX-Programmer','Ladder Diagram','I/O Mapping','PLC Omron CP1E'],
+    link: null
+  },
+  {
+    id: 3,
+    icon: '⚡',
+    name: 'K3 Listrik Dasar',
+    issuer: 'Kementerian Ketenagakerjaan RI',
+    date: 'Mar 2024',
+    year: 2024,
+    cat: 'Industri',
+    tier: 'elite',
+    id_num: 'KEMNAKER-K3L-2024-0334',
+    desc: 'Sertifikat Keselamatan dan Kesehatan Kerja (K3) bidang Listrik yang dikeluarkan Kemnaker RI. Mencakup regulasi K3 kelistrikan, prosedur kerja aman pada sistem tegangan rendah dan menengah.',
+    skills: ['K3 Listrik','Prosedur Kerja Aman','Regulasi Kelistrikan','First Aid'],
+    link: null
+  },
+  {
+    id: 4,
+    icon: '📡',
+    name: 'Belajar Dasar IoT — Dicoding',
+    issuer: 'Dicoding Indonesia',
+    date: 'Sep 2023',
+    year: 2023,
+    cat: 'IoT',
+    tier: 'elite',
+    id_num: 'DICODING-IOT-2023-D7A4',
+    desc: 'Kursus IoT Dasar dari Dicoding Indonesia mencakup konsep Internet of Things, protokol komunikasi MQTT, dan implementasi menggunakan ESP32 & sensor berbagai jenis.',
+    skills: ['ESP32','MQTT','Sensor Interfacing','Node-RED','Protokol IoT'],
+    link: 'https://dicoding.com'
+  },
+  {
+    id: 5,
+    icon: '🔌',
+    name: 'Workshop Mikrokontroler Arduino',
+    issuer: 'PENS — Politeknik Elektronika Negeri Surabaya',
+    date: 'Okt 2023',
+    year: 2023,
+    cat: 'IoT',
+    tier: 'verified',
+    id_num: 'PENS-WS-ARD-2023-0177',
+    desc: 'Workshop pengenalan mikrokontroler Arduino yang diselenggarakan PENS. Mencakup dasar pemrograman C/C++ untuk Arduino, interfacing sensor, dan pembuatan mini proyek IoT sederhana.',
+    skills: ['Arduino IDE','C/C++','Sensor','PWM','Serial Communication'],
+    link: null
+  },
+  {
+    id: 6,
+    icon: '📐',
+    name: 'AutoCAD Fundamentals',
+    issuer: 'Autodesk Learning Partner',
+    date: 'Jan 2024',
+    year: 2024,
+    cat: 'Industri',
+    tier: 'verified',
+    id_num: 'AUTODESK-ACF-2024-3301',
+    desc: 'Sertifikat penguasaan AutoCAD 2D & AutoCAD Electrical untuk pembuatan gambar teknik, wiring diagram, dan single line diagram sistem kelistrikan sesuai standar IEC.',
+    skills: ['AutoCAD 2D','AutoCAD Electrical','Wiring Diagram','Single Line Diagram'],
+    link: null
+  },
+  {
+    id: 7,
+    icon: '🎨',
+    name: 'Simulasi Sistem Kendali — Matlab & Simulink',
+    issuer: 'MathWorks (Online Training)',
+    date: 'Feb 2024',
+    year: 2024,
+    cat: 'Course',
+    tier: 'verified',
+    id_num: 'MATHWORKS-SIM-2024-9981',
+    desc: 'Kursus resmi MathWorks tentang Matlab & Simulink untuk simulasi sistem kontrol, mencakup pemodelan plant, desain kontroler PID, dan analisis respons sistem.',
+    skills: ['Matlab','Simulink','PID Controller','Transfer Function','Analisis Frekuensi'],
+    link: null
+  },
+  {
+    id: 8,
+    icon: '🌐',
+    name: 'English for Engineering',
+    issuer: 'British Council Online',
+    date: 'Des 2023',
+    year: 2023,
+    cat: 'Course',
+    tier: 'verified',
+    id_num: 'BC-ENG-2023-ID-2281',
+    desc: 'Kursus bahasa Inggris teknik dari British Council Online, fokus pada penulisan laporan teknis, presentasi proyek, dan komunikasi profesional dalam lingkungan engineering.',
+    skills: ['Technical Writing','Engineering English','Presentation Skills','Documentation'],
+    link: null
+  },
+  {
+    id: 9,
+    icon: '🏆',
+    name: 'Peserta LKTI Elektro Nasional',
+    issuer: 'ITS Surabaya',
+    date: 'Jul 2023',
+    year: 2023,
+    cat: 'Kompetisi',
+    tier: 'standard',
+    id_num: 'ITS-LKTI-2023-0892',
+    desc: 'Sertifikat peserta Lomba Karya Tulis Ilmiah (LKTI) bidang Elektro tingkat nasional yang diselenggarakan ITS Surabaya. Mempresentasikan karya inovasi sistem monitoring energi berbasis IoT.',
+    skills: ['Penulisan Ilmiah','IoT','Presentasi','Research'],
+    link: null
+  },
+  {
+    id: 10,
+    icon: '🔬',
+    name: 'Pengenalan Teknik Elektro Industri',
+    issuer: 'Coursera — Johns Hopkins University',
+    date: 'Nov 2022',
+    year: 2022,
+    cat: 'Course',
+    tier: 'standard',
+    id_num: 'COURSERA-TEI-2022-0419',
+    desc: 'Kursus pengenalan teknik elektro dari Coursera oleh Johns Hopkins University, mencakup dasar sirkuit listrik, komponen elektronika, dan pengantar sistem kontrol.',
+    skills: ['Rangkaian Listrik','Komponen Elektronika','Sistem Kontrol Dasar','Analisis Sirkuit'],
+    link: 'https://coursera.org'
+  },
+  {
+    id: 11,
+    icon: '🎯',
+    name: 'Seminar Industri 4.0 & Smart Manufacturing',
+    issuer: 'PENS & Industri Partner',
+    date: 'Mei 2023',
+    year: 2023,
+    cat: 'Akademik',
+    tier: 'standard',
+    id_num: 'PENS-SEM-IND40-2023-0055',
+    desc: 'Sertifikat keikutsertaan seminar nasional Industri 4.0 dan Smart Manufacturing yang diselenggarakan PENS. Membahas tren otomasi industri, digital twin, dan penerapan IIoT di manufaktur Indonesia.',
+    skills: ['Industri 4.0','Smart Manufacturing','IIoT','Digital Twin'],
+    link: null
+  }
+];
+
+/* ─────────── STATE ─────────── */
+let activeCat   = 'Semua';
+let activeQuery = '';
+let activeSort  = 'default';
+let viewMode    = 'grid'; // 'grid' | 'list'
+
+/* ─────────── HELPERS ─────────── */
+function tierOrder(t) { return TIER_ORDER[t] ?? 99; }
+
+function tierBadgeHTML(tier) {
+  return `<span class="cert-tier-badge badge-${tier}">${tier.toUpperCase()}</span>`;
+}
+
+function catTagHTML(cat) {
+  const map = { Akademik:'ctag-akademik', Industri:'ctag-industri', IoT:'ctag-iot', Kompetisi:'ctag-kompetisi', Course:'ctag-course' };
+  return `<span class="cert-cat-tag ${map[cat]||''}">${cat}</span>`;
+}
+
+function iconBg(tier) {
+  return `icon-${tier}`;
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  return text.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>');
+}
+
+/* ─────────── FILTER + SORT ─────────── */
+function getList() {
+  let list = [...certs];
+  if (activeCat !== 'Semua') list = list.filter(c => c.cat === activeCat);
+  if (activeQuery) {
+    const q = activeQuery.toLowerCase();
+    list = list.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.issuer.toLowerCase().includes(q) ||
+      c.cat.toLowerCase().includes(q) ||
+      c.skills.some(s => s.toLowerCase().includes(q))
+    );
+  }
+  if (activeSort === 'newest')  list.sort((a,b) => b.year - a.year);
+  if (activeSort === 'oldest')  list.sort((a,b) => a.year - b.year);
+  if (activeSort === 'tier')    list.sort((a,b) => tierOrder(a.tier) - tierOrder(b.tier));
+  if (activeSort === 'name')    list.sort((a,b) => a.name.localeCompare(b.name));
+  return list;
+}
+
+/* ─────────── RENDER ─────────── */
+function render() {
+  const list = getList();
+  const container = document.getElementById('certsContainer');
+  const empty     = document.getElementById('emptyState');
+
+  // Remove old cards
+  [...container.children].forEach(el => { if (el !== empty) el.remove(); });
+  empty.classList.remove('show');
+
+  // Update container class
+  container.className = viewMode === 'grid' ? 'certs-grid' : 'certs-list';
+
+  document.getElementById('navCount').textContent = list.length;
+  updateStats(list);
+
+  if (list.length === 0) { empty.classList.add('show'); updateMeta(list); return; }
+
+  const q = activeQuery;
+
+  list.forEach((c, i) => {
+    const el = viewMode === 'grid' ? buildCard(c, q, i) : buildListItem(c, q, i);
+    container.insertBefore(el, empty);
+  });
+
+  updateMeta(list);
+}
+
+function updateStats(list) {
+  const counts = { legendary:0, elite:0, verified:0, standard:0 };
+  list.forEach(c => counts[c.tier]++);
+  document.getElementById('statTotal').textContent    = list.length;
+  document.getElementById('statLegendary').textContent = counts.legendary;
+  document.getElementById('statElite').textContent    = counts.elite;
+  document.getElementById('statVerified').textContent = counts.verified;
+  document.getElementById('statStandard').textContent = counts.standard;
+}
+
+function updateMeta(list) {
+  const meta = document.getElementById('searchMeta');
+  if (activeQuery || activeCat !== 'Semua') {
+    meta.innerHTML = `Menampilkan <em>${list.length}</em> dari <em>${certs.length}</em> kredensial`;
+  } else {
+    meta.innerHTML = '';
+  }
+}
+
+function buildCard(c, q, i) {
+  const div = document.createElement('div');
+  div.className = `cert-card tier-${c.tier}`;
+  div.style.animationDelay = `${Math.min(i,10)*0.05}s`;
+  div.dataset.id = c.id;
+
+  div.innerHTML = `
+    <div class="cert-inner">
+      <div class="cert-front">
+        <div class="cert-top">
+          <div class="cert-icon-wrap ${iconBg(c.tier)}">${c.icon}</div>
+          ${tierBadgeHTML(c.tier)}
+        </div>
+        <div class="cert-bottom">
+          <div class="cert-name">${highlight(c.name, q)}</div>
+          <div class="cert-issuer">${highlight(c.issuer, q)}</div>
+          <div class="cert-foot">
+            <span class="cert-date">📅 ${c.date}</span>
+            ${catTagHTML(c.cat)}
+          </div>
+        </div>
+        <span class="cert-flip-hint">flip untuk detail ↻</span>
+      </div>
+      <div class="cert-back">
+        <div class="back-id">ID: <span>${c.id_num}</span></div>
+        <div class="back-desc">${c.desc.length > 130 ? c.desc.slice(0,127)+'…' : c.desc}</div>
+        <div class="back-skills">${c.skills.map(s=>`<span class="back-skill">${s}</span>`).join('')}</div>
+        <div class="back-verify"><span class="verify-dot"></span> Klik untuk detail lengkap</div>
+      </div>
+    </div>
+  `;
+
+  div.addEventListener('click', () => openModal(c.id));
+  return div;
+}
+
+function buildListItem(c, q, i) {
+  const div = document.createElement('div');
+  div.className = `cert-list-item tier-${c.tier}`;
+  div.style.animationDelay = `${Math.min(i,10)*0.04}s`;
+  div.dataset.id = c.id;
+
+  div.innerHTML = `
+    <div class="list-icon ${iconBg(c.tier)}">${c.icon}</div>
+    <div class="list-main">
+      <div class="list-name">${highlight(c.name, q)}</div>
+      <div class="list-issuer">${highlight(c.issuer, q)}</div>
+    </div>
+    <div class="list-right">
+      ${tierBadgeHTML(c.tier)}
+      <div class="list-date">${c.date}</div>
+      ${catTagHTML(c.cat)}
+    </div>
+  `;
+
+  div.addEventListener('click', () => openModal(c.id));
+  return div;
+}
+
+/* ─────────── MODAL ─────────── */
+function openModal(id) {
+  const c = certs.find(x => x.id === id);
+  if (!c) return;
+
+  document.getElementById('mIcon').className = `modal-icon ${iconBg(c.tier)}`;
+  document.getElementById('mIcon').textContent = c.icon;
+  document.getElementById('mTierBadge').innerHTML = tierBadgeHTML(c.tier);
+  document.getElementById('mTitle').textContent  = c.name;
+  document.getElementById('mIssuer').textContent = c.issuer;
+  document.getElementById('mMeta').innerHTML = `
+    <div class="modal-meta-item">📅 <strong>${c.date}</strong></div>
+    <div class="modal-meta-item">🗂 <strong>${c.cat}</strong></div>
+    <div class="modal-meta-item">🔖 <strong>${c.id_num}</strong></div>
+  `;
+  document.getElementById('mDesc').textContent = c.desc;
+  document.getElementById('mSkills').innerHTML = c.skills.map(s=>`<span class="modal-skill">${s}</span>`).join('');
+  document.getElementById('mActions').innerHTML = c.link
+    ? `<a href="${c.link}" target="_blank" class="btn-primary">↗ Verifikasi Online</a><button class="btn-outline" onclick="closeModal()">Tutup</button>`
+    : `<span class="btn-outline" style="opacity:0.45;cursor:default">🔒 Dokumen Fisik</span><button class="btn-outline" onclick="closeModal()">Tutup</button>`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+/* ─────────── EVENTS ─────────── */
+document.getElementById('searchInput').addEventListener('input', e => {
+  activeQuery = e.target.value.trim();
+  document.getElementById('searchClear').classList.toggle('show', activeQuery.length > 0);
+  render();
+});
+
+document.getElementById('searchClear').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  activeQuery = '';
+  document.getElementById('searchClear').classList.remove('show');
+  render();
+});
+
+document.getElementById('sortSel').addEventListener('change', e => {
+  activeSort = e.target.value; render();
+});
+
+document.querySelectorAll('.cat-tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
+  t.classList.add('active'); activeCat = t.dataset.cat; render();
+}));
+
+document.getElementById('gridViewBtn').addEventListener('click', () => {
+  viewMode = 'grid';
+  document.getElementById('gridViewBtn').classList.add('active');
+  document.getElementById('listViewBtn').classList.remove('active');
+  render();
+});
+
+document.getElementById('listViewBtn').addEventListener('click', () => {
+  viewMode = 'list';
+  document.getElementById('listViewBtn').classList.add('active');
+  document.getElementById('gridViewBtn').classList.remove('active');
+  render();
+});
+
+/* keyboard shortcuts */
+document.addEventListener('keydown', e => {
+  const inp = document.getElementById('searchInput');
+  if (e.key === '/' && document.activeElement !== inp) { e.preventDefault(); inp.focus(); }
+  if (e.key === 'Escape') {
+    if (document.getElementById('modalOverlay').classList.contains('open')) closeModal();
+    else if (document.activeElement === inp) { inp.value=''; activeQuery=''; document.getElementById('searchClear').classList.remove('show'); render(); inp.blur(); }
+  }
+});
+
+/* ─────────── CURSOR ─────────── */
+const glow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => { glow.style.left=e.clientX+'px'; glow.style.top=e.clientY+'px'; });
+
+/* ─────────── INIT ─────────── */
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Proyek — eSYIM Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── ROOT VARS ── */
+    :root {
+      --bg:      #080b10;
+      --surface: #0d1117;
+      --card:    #111820;
+      --card2:   #0f1a24;
+      --border:  rgba(0,230,200,0.12);
+      --accent:  #00e6c8;
+      --accent2: #7b61ff;
+      --accent3: #ff6b6b;
+      --accent4: #f5a623;
+      --text:    #e8eaf0;
+      --muted:   #6b7a8d;
+      --glow:    0 0 32px rgba(0,230,200,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE ── */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:0; opacity:0.6;
+    }
+
+    /* ── ORBS ── */
+    .orb { position:fixed; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; }
+    .orb-1 { width:600px; height:600px; background:rgba(0,230,200,0.04); top:-150px; right:-150px; }
+    .orb-2 { width:500px; height:500px; background:rgba(123,97,255,0.05); bottom:50px; left:-150px; }
+    .orb-3 { width:300px; height:300px; background:rgba(255,107,107,0.03); top:50%; left:40%; }
+
+    /* ── CURSOR GLOW ── */
+    .cursor-glow {
+      position:fixed; width:320px; height:320px; border-radius:50%;
+      background:radial-gradient(circle,rgba(0,230,200,0.04) 0%,transparent 70%);
+      pointer-events:none; z-index:0;
+      transform:translate(-50%,-50%);
+      transition:transform 0.08s linear;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.2rem 4rem;
+      background:rgba(8,11,16,0.75);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem;
+      letter-spacing:-0.02em; color:var(--accent); text-decoration:none;
+    }
+    .nav-logo span { color:var(--text); }
+    .nav-right { display:flex; align-items:center; gap:1.5rem; }
+    .nav-stat {
+      font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted);
+      letter-spacing:0.08em;
+    }
+    .nav-stat span { color:var(--accent); }
+    .nav-back {
+      display:flex; align-items:center; gap:0.4rem;
+      font-family:'DM Mono',monospace; font-size:0.78rem;
+      color:var(--muted); text-decoration:none; letter-spacing:0.08em;
+      text-transform:uppercase; transition:color 0.2s;
+    }
+    .nav-back:hover { color:var(--accent); }
+
+    /* ── PAGE WRAPPER ── */
+    .page {
+      position:relative; z-index:1;
+      max-width:1300px; margin:0 auto;
+      padding:8rem 4rem 6rem;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header { margin-bottom:3rem; }
+    .section-tag {
+      font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--accent);
+      letter-spacing:0.18em; text-transform:uppercase;
+      margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem;
+      opacity:0; animation:fadeUp 0.7s 0.1s forwards;
+    }
+    .section-tag::before { content:''; display:inline-block; width:28px; height:1px; background:var(--accent); }
+    h1 {
+      font-family:'Syne',sans-serif;
+      font-size:clamp(2.6rem,5vw,4.2rem);
+      font-weight:800; line-height:1.05; letter-spacing:-0.03em;
+      margin-bottom:1rem;
+      opacity:0; animation:fadeUp 0.7s 0.25s forwards;
+    }
+    h1 em { font-style:normal; color:var(--accent); }
+    .page-sub {
+      color:var(--muted); font-size:1rem; line-height:1.7; max-width:560px;
+      opacity:0; animation:fadeUp 0.7s 0.4s forwards;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display:flex; gap:2rem; margin:2.5rem 0 3rem;
+      opacity:0; animation:fadeUp 0.7s 0.5s forwards;
+    }
+    .stat-item {
+      display:flex; flex-direction:column; gap:0.2rem;
+    }
+    .stat-number {
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size:2rem; color:var(--accent); line-height:1;
+    }
+    .stat-label {
+      font-family:'DM Mono',monospace; font-size:0.68rem;
+      color:var(--muted); letter-spacing:0.1em; text-transform:uppercase;
+    }
+    .stat-divider { width:1px; background:var(--border); align-self:stretch; }
+
+    /* ── FEATURED HERO ── */
+    .featured-label {
+      font-family:'DM Mono',monospace; font-size:0.7rem;
+      color:var(--accent4); letter-spacing:0.15em; text-transform:uppercase;
+      margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;
+      opacity:0; animation:fadeUp 0.7s 0.55s forwards;
+    }
+    .featured-label::before { content:'★'; }
+
+    .featured-hero {
+      position:relative; border-radius:20px; overflow:hidden;
+      border:1px solid rgba(0,230,200,0.2);
+      background:linear-gradient(135deg,#060e1a 0%,#0a1428 50%,#060c18 100%);
+      margin-bottom:1rem;
+      min-height:380px; display:flex;
+      cursor:pointer;
+      opacity:0; animation:fadeUp 0.7s 0.65s forwards;
+      transition:transform 0.4s, box-shadow 0.4s;
+    }
+    .featured-hero:hover {
+      transform:translateY(-5px);
+      box-shadow:0 24px 60px rgba(0,0,0,0.5), 0 0 60px rgba(0,230,200,0.1);
+    }
+
+    /* animated grid lines bg */
+    .featured-hero::before {
+      content:'';
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(0,230,200,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,230,200,0.04) 1px, transparent 1px);
+      background-size:40px 40px;
+      animation:gridMove 20s linear infinite;
+    }
+    @keyframes gridMove {
+      0% { background-position:0 0; }
+      100% { background-position:40px 40px; }
+    }
+
+    .featured-thumb {
+      position:relative; flex:0 0 45%;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg, rgba(0,230,200,0.08) 0%, rgba(123,97,255,0.08) 100%);
+      overflow:hidden; border-right:1px solid var(--border);
+    }
+    .featured-thumb-icon {
+      font-size:7rem; position:relative; z-index:1;
+      filter:drop-shadow(0 0 30px rgba(0,230,200,0.4));
+      animation:float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform:translateY(0); }
+      50% { transform:translateY(-12px); }
+    }
+    .featured-thumb-glow {
+      position:absolute; width:200px; height:200px; border-radius:50%;
+      background:radial-gradient(circle, rgba(0,230,200,0.15) 0%, transparent 70%);
+    }
+
+    /* circuit lines decoration */
+    .circuit { position:absolute; opacity:0.15; pointer-events:none; }
+
+    .featured-content {
+      flex:1; padding:3rem; position:relative; z-index:1;
+      display:flex; flex-direction:column; justify-content:center;
+    }
+    .featured-badge {
+      display:inline-flex; align-items:center; gap:0.4rem;
+      background:rgba(245,166,35,0.15); border:1px solid rgba(245,166,35,0.3);
+      color:var(--accent4); border-radius:6px;
+      padding:0.3rem 0.8rem; font-family:'DM Mono',monospace;
+      font-size:0.68rem; letter-spacing:0.1em;
+      width:fit-content; margin-bottom:1.2rem;
+    }
+    .featured-tags {
+      display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.2rem;
+    }
+    .tag {
+      font-family:'DM Mono',monospace; font-size:0.68rem;
+      padding:0.2rem 0.6rem; border-radius:4px;
+      background:rgba(0,230,200,0.08); color:var(--accent);
+      border:1px solid rgba(0,230,200,0.2); letter-spacing:0.05em;
+    }
+    .tag.purple { background:rgba(123,97,255,0.08); color:var(--accent2); border-color:rgba(123,97,255,0.2); }
+    .featured-title {
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size:clamp(1.5rem,3vw,2.2rem);
+      line-height:1.15; letter-spacing:-0.02em;
+      margin-bottom:0.9rem;
+    }
+    .featured-desc {
+      color:var(--muted); font-size:0.95rem; line-height:1.75;
+      margin-bottom:1.8rem; max-width:480px;
+    }
+    .featured-meta {
+      display:flex; align-items:center; gap:1.5rem;
+      margin-bottom:1.8rem;
+    }
+    .meta-item {
+      display:flex; align-items:center; gap:0.4rem;
+      font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--muted);
+    }
+    .meta-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block; }
+    .meta-dot.orange { background:var(--accent4); }
+    .featured-actions { display:flex; gap:1rem; }
+    .btn-primary {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.75rem 1.8rem; border-radius:8px;
+      background:var(--accent); color:var(--bg);
+      font-family:'DM Mono',monospace; font-size:0.8rem;
+      font-weight:600; letter-spacing:0.06em; text-decoration:none;
+      transition:all 0.3s;
+    }
+    .btn-primary:hover { box-shadow:var(--glow); transform:translateY(-2px); }
+    .btn-outline {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.75rem 1.8rem; border-radius:8px;
+      border:1px solid var(--border); color:var(--muted);
+      font-family:'DM Mono',monospace; font-size:0.8rem;
+      letter-spacing:0.06em; text-decoration:none;
+      transition:all 0.3s;
+    }
+    .btn-outline:hover { border-color:rgba(0,230,200,0.3); color:var(--accent); transform:translateY(-2px); }
+
+    /* scroll indicator on hero */
+    .featured-scroll {
+      position:absolute; bottom:1.5rem; right:2rem;
+      font-family:'DM Mono',monospace; font-size:0.65rem;
+      color:var(--muted); letter-spacing:0.08em;
+      display:flex; align-items:center; gap:0.4rem; opacity:0.5;
+    }
+
+    /* ── SEARCH + FILTER ── */
+    .controls {
+      display:flex; flex-direction:column; gap:1rem;
+      margin-bottom:2.5rem;
+      opacity:0; animation:fadeUp 0.7s 0.75s forwards;
+    }
+    .search-row { display:flex; gap:0.8rem; align-items:center; }
+    .search-wrap {
+      position:relative; flex:1;
+    }
+    .search-icon-el {
+      position:absolute; left:1.1rem; top:50%; transform:translateY(-50%);
+      font-size:0.9rem; pointer-events:none; color:var(--muted);
+    }
+    .search-input {
+      width:100%; padding:0.85rem 2.8rem 0.85rem 2.8rem;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:10px; color:var(--text);
+      font-family:'DM Mono',monospace; font-size:0.84rem;
+      letter-spacing:0.04em; outline:none;
+      transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input::placeholder { color:var(--muted); }
+    .search-input:focus {
+      border-color:rgba(0,230,200,0.45);
+      box-shadow:0 0 0 3px rgba(0,230,200,0.08);
+    }
+    .search-clear {
+      position:absolute; right:1rem; top:50%; transform:translateY(-50%);
+      background:none; border:none; color:var(--muted); cursor:pointer;
+      font-size:0.9rem; padding:0.2rem 0.4rem; border-radius:4px;
+      display:none; transition:color 0.2s;
+    }
+    .search-clear:hover { color:var(--accent3); }
+    .search-clear.show { display:block; }
+
+    .sort-select {
+      padding:0.85rem 1.2rem; border-radius:10px;
+      background:var(--card); border:1px solid var(--border);
+      color:var(--muted); font-family:'DM Mono',monospace;
+      font-size:0.78rem; cursor:pointer; outline:none;
+      letter-spacing:0.04em; white-space:nowrap;
+      transition:border-color 0.2s;
+    }
+    .sort-select:focus { border-color:rgba(0,230,200,0.3); }
+
+    .filter-tabs {
+      display:flex; gap:0.5rem; flex-wrap:wrap;
+    }
+    .filter-tab {
+      padding:0.42rem 1.1rem; border-radius:20px;
+      border:1px solid var(--border); background:transparent;
+      color:var(--muted); font-family:'DM Mono',monospace;
+      font-size:0.72rem; letter-spacing:0.06em; cursor:pointer;
+      transition:all 0.2s; white-space:nowrap;
+    }
+    .filter-tab:hover { border-color:rgba(0,230,200,0.3); color:var(--text); }
+    .filter-tab.active {
+      background:var(--accent); border-color:var(--accent);
+      color:var(--bg); font-weight:600;
+    }
+
+    /* search meta */
+    .search-meta {
+      font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--muted);
+      min-height:1.2em; letter-spacing:0.04em;
+    }
+    .search-meta em { color:var(--accent); font-style:normal; }
+
+    /* ── PROJECTS GRID ── */
+    .projects-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+      gap:1.5rem; margin-bottom:4rem;
+    }
+
+    .project-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden;
+      transition:transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      cursor:pointer; display:flex; flex-direction:column;
+      opacity:0; animation:fadeUp 0.6s forwards;
+    }
+    .project-card:hover {
+      transform:translateY(-6px);
+      border-color:rgba(0,230,200,0.25);
+      box-shadow:0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,230,200,0.07);
+    }
+
+    /* ── THUMBNAILS ── */
+    .proj-thumb {
+      position:relative; height:180px;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden; flex-shrink:0;
+    }
+
+    /* each project's unique gradient */
+    .thumb-iot     { background:linear-gradient(135deg,#041a2e 0%,#062a1e 50%,#041428 100%); }
+    .thumb-plc     { background:linear-gradient(135deg,#1a0d2e 0%,#0d1a3a 50%,#120a2a 100%); }
+    .thumb-pcb     { background:linear-gradient(135deg,#1a0a06 0%,#2a0e08 50%,#120408 100%); }
+    .thumb-hmi     { background:linear-gradient(135deg,#061a1a 0%,#083024 50%,#041618 100%); }
+    .thumb-autocad { background:linear-gradient(135deg,#1a1406 0%,#241a08 50%,#120c04 100%); }
+    .thumb-python  { background:linear-gradient(135deg,#061428 0%,#0a1e3a 50%,#041020 100%); }
+    .thumb-arduino { background:linear-gradient(135deg,#061a10 0%,#0a2a18 50%,#041208 100%); }
+    .thumb-matlab  { background:linear-gradient(135deg,#1a0606 0%,#2a0a0a 50%,#120404 100%); }
+
+    .thumb-grid-lines {
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size:24px 24px;
+    }
+    .thumb-icon {
+      font-size:3.5rem; position:relative; z-index:1;
+      filter:drop-shadow(0 0 16px currentColor);
+      transition:transform 0.3s;
+    }
+    .project-card:hover .thumb-icon { transform:scale(1.1); }
+
+    .thumb-glow-el {
+      position:absolute; width:120px; height:120px; border-radius:50%;
+      opacity:0.3; filter:blur(30px);
+    }
+    .glow-green  { background:#00e6c8; }
+    .glow-purple { background:#7b61ff; }
+    .glow-red    { background:#ff6b6b; }
+    .glow-teal   { background:#00b4d8; }
+    .glow-orange { background:#f5a623; }
+
+    /* corner accent */
+    .thumb-corner {
+      position:absolute; top:12px; right:12px; z-index:2;
+      display:flex; gap:0.4rem;
+    }
+    .status-badge {
+      font-family:'DM Mono',monospace; font-size:0.6rem;
+      letter-spacing:0.08em; padding:0.22rem 0.6rem;
+      border-radius:4px; font-weight:600;
+    }
+    .status-done   { background:rgba(0,230,200,0.15); color:var(--accent); border:1px solid rgba(0,230,200,0.2); }
+    .status-wip    { background:rgba(245,166,35,0.15); color:var(--accent4); border:1px solid rgba(245,166,35,0.2); }
+    .status-idea   { background:rgba(123,97,255,0.15); color:var(--accent2); border:1px solid rgba(123,97,255,0.2); }
+
+    .featured-star {
+      font-size:0.8rem;
+      background:rgba(245,166,35,0.2); color:var(--accent4);
+      border:1px solid rgba(245,166,35,0.3);
+      border-radius:4px; padding:0.22rem 0.5rem;
+      font-family:'DM Mono',monospace; font-size:0.6rem;
+      letter-spacing:0.05em;
+    }
+
+    /* ── CARD BODY ── */
+    .proj-body { padding:1.3rem 1.4rem 1.4rem; flex:1; display:flex; flex-direction:column; }
+    .proj-cat {
+      font-family:'DM Mono',monospace; font-size:0.65rem;
+      letter-spacing:0.12em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:0.5rem;
+    }
+    .proj-title {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:1.05rem;
+      line-height:1.3; margin-bottom:0.6rem; color:var(--text);
+    }
+    .proj-desc {
+      font-size:0.84rem; color:var(--muted); line-height:1.6;
+      margin-bottom:1rem; flex:1;
+    }
+    .proj-tags { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .proj-tag {
+      font-family:'DM Mono',monospace; font-size:0.63rem;
+      padding:0.18rem 0.55rem; border-radius:4px;
+      background:rgba(0,230,200,0.07); color:var(--accent);
+      border:1px solid rgba(0,230,200,0.15); letter-spacing:0.04em;
+    }
+    .proj-tag.p { background:rgba(123,97,255,0.07); color:var(--accent2); border-color:rgba(123,97,255,0.15); }
+    .proj-tag.r { background:rgba(255,107,107,0.07); color:var(--accent3); border-color:rgba(255,107,107,0.15); }
+
+    .proj-footer {
+      display:flex; align-items:center; justify-content:space-between;
+      padding-top:0.9rem; border-top:1px solid var(--border);
+      margin-top:auto;
+    }
+    .proj-date {
+      font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted);
+    }
+    .proj-links { display:flex; gap:0.8rem; }
+    .proj-link {
+      font-family:'DM Mono',monospace; font-size:0.72rem;
+      color:var(--accent); text-decoration:none; letter-spacing:0.05em;
+      opacity:0.7; transition:opacity 0.2s;
+    }
+    .proj-link:hover { opacity:1; }
+    .proj-link.disabled { color:var(--muted); pointer-events:none; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display:none; text-align:center; padding:5rem 2rem; grid-column:1/-1;
+    }
+    .empty-state.show { display:block; }
+    .empty-icon { font-size:3rem; margin-bottom:1rem; }
+    .empty-text { font-family:'DM Mono',monospace; font-size:0.82rem; color:var(--muted); letter-spacing:0.04em; }
+
+    /* ── HIGHLIGHT ── */
+    mark { background:rgba(0,230,200,0.2); color:var(--accent); border-radius:2px; padding:0 2px; }
+
+    /* ── BACK BTN ── */
+    .back-btn {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.85rem 2rem; border-radius:8px;
+      border:1px solid var(--border); color:var(--muted);
+      text-decoration:none; font-family:'DM Mono',monospace;
+      font-size:0.8rem; letter-spacing:0.06em; transition:all 0.3s;
+    }
+    .back-btn:hover { color:var(--accent); border-color:rgba(0,230,200,0.3); transform:translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer {
+      position:relative; z-index:1; text-align:center;
+      padding:2rem; border-top:1px solid var(--border);
+      color:var(--muted); font-family:'DM Mono',monospace;
+      font-size:0.72rem; letter-spacing:0.05em; margin-top:4rem;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(8px); z-index:200;
+      display:none; align-items:center; justify-content:center;
+      padding:2rem;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--card2); border:1px solid var(--border);
+      border-radius:20px; max-width:700px; width:100%;
+      max-height:90vh; overflow-y:auto;
+      animation:modalIn 0.3s ease;
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform:scale(0.95) translateY(20px); }
+      to   { opacity:1; transform:scale(1) translateY(0); }
+    }
+    .modal-thumb {
+      height:220px; display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden; border-radius:20px 20px 0 0;
+    }
+    .modal-body { padding:2rem; }
+    .modal-close {
+      position:absolute; top:1rem; right:1rem; background:rgba(0,0,0,0.5);
+      border:1px solid var(--border); color:var(--text); border-radius:8px;
+      width:36px; height:36px; cursor:pointer; font-size:1rem;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.2s; z-index:10;
+    }
+    .modal-close:hover { background:rgba(255,107,107,0.2); color:var(--accent3); }
+    .modal-tags { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .modal-title {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.8rem;
+      letter-spacing:-0.02em; margin-bottom:0.6rem;
+    }
+    .modal-meta {
+      display:flex; gap:1.5rem; margin-bottom:1.2rem;
+    }
+    .modal-meta-item {
+      font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--muted);
+      display:flex; align-items:center; gap:0.4rem;
+    }
+    .modal-desc {
+      color:var(--muted); line-height:1.8; font-size:0.95rem; margin-bottom:1.5rem;
+    }
+    .modal-features { margin-bottom:1.5rem; }
+    .modal-features-title {
+      font-family:'DM Mono',monospace; font-size:0.72rem;
+      color:var(--accent); letter-spacing:0.1em; text-transform:uppercase;
+      margin-bottom:0.7rem;
+    }
+    .feature-list { list-style:none; display:flex; flex-direction:column; gap:0.5rem; }
+    .feature-list li {
+      font-size:0.88rem; color:var(--muted); padding-left:1.2rem; position:relative;
+    }
+    .feature-list li::before { content:'→'; position:absolute; left:0; color:var(--accent); }
+    .modal-actions { display:flex; gap:1rem; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .project-card:nth-child(1)  { animation-delay:0.05s; }
+    .project-card:nth-child(2)  { animation-delay:0.10s; }
+    .project-card:nth-child(3)  { animation-delay:0.15s; }
+    .project-card:nth-child(4)  { animation-delay:0.20s; }
+    .project-card:nth-child(5)  { animation-delay:0.25s; }
+    .project-card:nth-child(6)  { animation-delay:0.30s; }
+    .project-card:nth-child(7)  { animation-delay:0.35s; }
+    .project-card:nth-child(8)  { animation-delay:0.40s; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:rgba(0,230,200,0.3); border-radius:3px; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px){
+      nav { padding:1rem 1.5rem; }
+      .nav-stat { display:none; }
+      .page { padding:7rem 1.5rem 4rem; }
+      .featured-hero { flex-direction:column; min-height:auto; }
+      .featured-thumb { flex:0 0 180px; border-right:none; border-bottom:1px solid var(--border); }
+      .featured-content { padding:1.8rem; }
+      .projects-grid { grid-template-columns:1fr; }
+      .stats-row { gap:1.2rem; }
+      .sort-select { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <a href="untitled.html" class="nav-logo">{ <span>eSYIM</span>Porto }</a>
+  <div class="nav-right">
+    <div class="nav-stat" id="navStat"><span id="visibleCount">8</span> Proyek</div>
+    <a href="halamanutama.html#projects" class="nav-back">← Kembali</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <p class="section-tag">Portfolio</p>
+    <h1>Semua <em>Proyek</em></h1>
+    <p class="page-sub">Kumpulan proyek teknik elektro industri — dari otomasi PLC, sistem IoT, desain PCB, hingga simulasi kontrol.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-number">8</div>
+      <div class="stat-label">Total Proyek</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-number">5</div>
+      <div class="stat-label">Selesai</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-number">4</div>
+      <div class="stat-label">Kategori</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-number">2</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+  </div>
+
+  <!-- Featured Hero -->
+  <div class="featured-label">Proyek Unggulan</div>
+  <div class="featured-hero" onclick="openModal(0)">
+    <div class="featured-thumb thumb-iot">
+      <div class="thumb-grid-lines"></div>
+      <div class="thumb-glow-el glow-green"></div>
+      <div class="featured-thumb-icon">📡</div>
+    </div>
+    <div class="featured-content">
+      <div class="featured-badge">⭐ Featured Project</div>
+      <div class="featured-tags">
+        <span class="tag">ESP32</span>
+        <span class="tag">MQTT</span>
+        <span class="tag purple">IoT</span>
+        <span class="tag">Node-RED</span>
+      </div>
+      <div class="featured-title">Smart Factory Monitoring System</div>
+      <div class="featured-desc">Sistem monitoring kondisi mesin pabrik secara real-time menggunakan ESP32 dan sensor suhu, kelembaban, serta getaran. Data ditampilkan di dashboard Node-RED dengan notifikasi otomatis via Telegram.</div>
+      <div class="featured-meta">
+        <div class="meta-item"><span class="meta-dot"></span> Selesai</div>
+        <div class="meta-item"><span class="meta-dot orange"></span> 2024</div>
+        <div class="meta-item">🛠 IoT · Embedded</div>
+      </div>
+      <div class="featured-actions">
+        <a href="#" class="btn-primary" onclick="event.stopPropagation()">↗ Lihat Detail</a>
+        <a href="#" class="btn-outline" onclick="event.stopPropagation()">⌥ GitHub</a>
+      </div>
+    </div>
+    <div class="featured-scroll">scroll ↓</div>
+  </div>
+
+  <!-- Search + Filter -->
+  <div class="controls">
+    <div class="search-row">
+      <div class="search-wrap">
+        <span class="search-icon-el">🔍</span>
+        <input type="text" id="searchInput" class="search-input"
+          placeholder="Cari proyek... (misal: PLC, IoT, PCB)" autocomplete="off"/>
+        <button class="search-clear" id="searchClear">✕</button>
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="default">Urutan Default</option>
+        <option value="name">Nama A→Z</option>
+        <option value="newest">Terbaru</option>
+        <option value="oldest">Terlama</option>
+      </select>
+    </div>
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" data-cat="Semua">Semua</button>
+      <button class="filter-tab" data-cat="IoT">📡 IoT</button>
+      <button class="filter-tab" data-cat="Otomasi">🏭 Otomasi</button>
+      <button class="filter-tab" data-cat="Hardware">⚡ Hardware</button>
+      <button class="filter-tab" data-cat="Simulasi">📐 Simulasi</button>
+    </div>
+    <div class="search-meta" id="searchMeta"></div>
+  </div>
+
+  <!-- Projects Grid -->
+  <div class="projects-grid" id="projectsGrid">
+    <!-- diisi oleh JS -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🔎</div>
+      <p class="empty-text">Tidak ada proyek yang cocok.<br/>Coba kata kunci lain.</p>
+    </div>
+  </div>
+
+  <a href="halamanutama.html#projects" class="back-btn">← Kembali ke Portfolio</a>
+</div>
+
+<footer>
+  <p>© 2026 eSYIM · Mukhamad Hasyim · Teknik Elektro Industri PENS</p>
+</footer>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-thumb" id="modalThumb">
+      <button class="modal-close" onclick="closeModal(null)">✕</button>
+      <div class="thumb-grid-lines"></div>
+      <div class="thumb-glow-el" id="modalGlow"></div>
+      <div class="thumb-icon" id="modalIcon"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-features">
+        <div class="modal-features-title">Fitur Utama</div>
+        <ul class="feature-list" id="modalFeatures"></ul>
+      </div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ───────────── DATA PROYEK ───────────── */
+const projects = [
+  {
+    id: 0,
+    title: "Smart Factory Monitoring System",
+    cat: "IoT",
+    thumbClass: "thumb-iot",
+    glowClass: "glow-green",
+    icon: "📡",
+    status: "done",
+    statusLabel: "Selesai",
+    year: 2024,
+    featured: true,
+    tags: ["ESP32","MQTT","IoT","Node-RED"],
+    tagColors: ["","","p",""],
+    desc: "Sistem monitoring kondisi mesin pabrik secara real-time menggunakan ESP32 dan sensor suhu, kelembaban, serta getaran. Data ditampilkan di dashboard Node-RED dengan notifikasi otomatis via Telegram.",
+    features: [
+      "Monitoring suhu, kelembaban, dan getaran mesin real-time",
+      "Dashboard Node-RED dengan grafik historis",
+      "Notifikasi otomatis via Telegram jika anomali terdeteksi",
+      "Data tersimpan ke InfluxDB untuk analisis jangka panjang",
+      "Koneksi MQTT aman dengan autentikasi"
+    ],
+    demo: "#", github: "#"
+  },
+  {
+    id: 1,
+    title: "Sistem Kontrol Konveyor PLC Omron",
+    cat: "Otomasi",
+    thumbClass: "thumb-plc",
+    glowClass: "glow-purple",
+    icon: "🏭",
+    status: "done",
+    statusLabel: "Selesai",
+    year: 2024,
+    featured: false,
+    tags: ["CX-Programmer","PLC","Ladder Diagram","HMI"],
+    tagColors: ["p","p","","p"],
+    desc: "Program PLC Omron CP1E untuk mengendalikan sistem konveyor sortasi barang otomatis berdasarkan berat dan warna produk, dilengkapi panel HMI untuk monitoring operator.",
+    features: [
+      "Ladder diagram untuk logika sortasi 3 jalur",
+      "Integrasi sensor berat dan sensor warna",
+      "Panel HMI dengan tampilan status real-time",
+      "Sistem emergency stop dan alarm",
+      "Log aktivitas dan statistik produksi"
+    ],
+    demo: "#", github: "#"
+  },
+  {
+    id: 2,
+    title: "Desain PCB Modul Relay 8 Channel",
+    cat: "Hardware",
+    thumbClass: "thumb-pcb",
+    glowClass: "glow-red",
+    icon: "🔌",
+    status: "done",
+    statusLabel: "Selesai",
+    year: 2023,
+    featured: false,
+    tags: ["Eagle PCB","Soldering","Schematic"],
+    tagColors: ["r","r",""],
+    desc: "Perancangan dan fabrikasi PCB modul relay 8 channel dengan isolasi optocoupler, proteksi flyback diode, dan kompatibel dengan Arduino/Raspberry Pi.",
+    features: [
+      "8 channel relay 5V, max 10A/250VAC",
+      "Optocoupler PC817 untuk isolasi sinyal",
+      "Flyback diode proteksi lonjakan tegangan",
+      "Indikator LED tiap channel",
+      "Kompatibel 3.3V dan 5V logic"
+    ],
+    demo: null, github: "#"
+  },
+  {
+    id: 3,
+    title: "Dashboard SCADA Monitoring Energi",
+    cat: "IoT",
+    thumbClass: "thumb-hmi",
+    glowClass: "glow-teal",
+    icon: "📊",
+    status: "wip",
+    statusLabel: "In Progress",
+    year: 2025,
+    featured: false,
+    tags: ["SCADA","Node-RED","Modbus","Python"],
+    tagColors: ["","p","","p"],
+    desc: "Sistem SCADA berbasis web untuk monitoring konsumsi energi listrik industri secara real-time, dengan analisis pola penggunaan dan laporan efisiensi otomatis.",
+    features: [
+      "Monitoring tegangan, arus, dan daya real-time",
+      "Komunikasi Modbus RTU ke energy meter",
+      "Grafik historis harian, mingguan, bulanan",
+      "Alert ketika konsumsi melebihi threshold",
+      "Export laporan PDF otomatis tiap bulan"
+    ],
+    demo: null, github: "#"
+  },
+  {
+    id: 4,
+    title: "Simulasi Sistem Pneumatik FluidSim",
+    cat: "Simulasi",
+    thumbClass: "thumb-autocad",
+    glowClass: "glow-orange",
+    icon: "🎨",
+    status: "done",
+    statusLabel: "Selesai",
+    year: 2023,
+    featured: false,
+    tags: ["FluidSim","Pneumatik","P&ID"],
+    tagColors: ["r","",""],
+    desc: "Perancangan dan simulasi sistem pneumatik untuk press machine 2 silinder menggunakan FluidSim, lengkap dengan diagram P&ID dan sequence chart operasi mesin.",
+    features: [
+      "Simulasi 2 silinder double-acting",
+      "Kontrol via katup solenoid 5/2",
+      "Sequence chart A+B+A-B- otomatis",
+      "Diagram P&ID sesuai standar ISO 1219",
+      "Analisis kecepatan dan gaya silinder"
+    ],
+    demo: null, github: null
+  },
+  {
+    id: 5,
+    title: "Smart Greenhouse IoT Arduino",
+    cat: "IoT",
+    thumbClass: "thumb-arduino",
+    glowClass: "glow-green",
+    icon: "🌱",
+    status: "done",
+    statusLabel: "Selesai",
+    year: 2024,
+    featured: false,
+    tags: ["Arduino","Sensor","IoT","Blynk"],
+    tagColors: ["","","p","p"],
+    desc: "Sistem kontrol greenhouse otomatis berbasis Arduino Uno yang mengatur suhu, kelembaban udara, dan kelembaban tanah secara otomatis dengan monitoring via aplikasi Blynk.",
+    features: [
+      "Sensor DHT22 suhu & kelembaban udara",
+      "Sensor soil moisture kelembaban tanah",
+      "Kontrol kipas, lampu UV, dan pompa air otomatis",
+      "Monitoring real-time via Blynk mobile app",
+      "Mode manual dan otomatis"
+    ],
+    demo: "#", github: "#"
+  },
+  {
+    id: 6,
+    title: "Analisis Sistem Kontrol PID — Matlab",
+    cat: "Simulasi",
+    thumbClass: "thumb-matlab",
+    glowClass: "glow-red",
+    icon: "📈",
+    status: "done",
+    statusLabel: "Selesai",
+    year: 2023,
+    featured: false,
+    tags: ["Matlab","Simulink","PID","Kontrol"],
+    tagColors: ["r","r","",""],
+    desc: "Perancangan dan simulasi kontroler PID untuk sistem pengaturan kecepatan motor DC menggunakan Matlab Simulink dengan analisis respons transien dan steady-state.",
+    features: [
+      "Model plant motor DC dengan transfer function",
+      "Tuning PID metode Ziegler-Nichols",
+      "Analisis respons step: rise time, overshoot, settling time",
+      "Perbandingan P, PI, dan PID controller",
+      "Simulasi gangguan beban dan noise"
+    ],
+    demo: null, github: "#"
+  },
+  {
+    id: 7,
+    title: "AutoCAD Wiring Diagram Panel MCC",
+    cat: "Hardware",
+    thumbClass: "thumb-autocad",
+    glowClass: "glow-orange",
+    icon: "🔧",
+    status: "wip",
+    statusLabel: "In Progress",
+    year: 2025,
+    featured: false,
+    tags: ["AutoCAD","Wiring","Panel Listrik","MCC"],
+    tagColors: ["r","","","r"],
+    desc: "Perancangan wiring diagram lengkap untuk panel Motor Control Center (MCC) industri menggunakan AutoCAD Electrical, termasuk single line diagram dan layout panel.",
+    features: [
+      "Single line diagram sistem distribusi daya",
+      "Wiring diagram komponen: MCB, Contactor, Thermal OL",
+      "Layout panel sesuai standar IEC 60439",
+      "Bill of Material (BOM) otomatis",
+      "Numbering kabel sesuai standar NFPA 79"
+    ],
+    demo: null, github: null
+  }
+];
+
+/* ───────────── RENDER GRID ───────────── */
+const grid = document.getElementById('projectsGrid');
+const emptyState = document.getElementById('emptyState');
+
+function statusBadge(p) {
+  if (p.status === 'done') return `<span class="status-badge status-done">✓ Selesai</span>`;
+  if (p.status === 'wip')  return `<span class="status-badge status-wip">⟳ In Progress</span>`;
+  return `<span class="status-badge status-idea">◈ Konsep</span>`;
+}
+
+function renderCards(list) {
+  // Remove existing cards (not emptyState)
+  [...grid.querySelectorAll('.project-card')].forEach(c => c.remove());
+  emptyState.classList.remove('show');
+
+  if (list.length === 0) {
+    emptyState.classList.add('show');
+    document.getElementById('navStat').innerHTML = `<span>0</span> Proyek`;
+    document.getElementById('searchMeta').innerHTML = `Tidak ada proyek ditemukan`;
+    return;
+  }
+
+  document.getElementById('navStat').innerHTML = `<span>${list.length}</span> Proyek`;
+
+  list.forEach((p, i) => {
+    const tagHtml = p.tags.map((t,j) =>
+      `<span class="proj-tag ${p.tagColors[j]||''}">${t}</span>`
+    ).join('');
+
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.dataset.id = p.id;
+    card.dataset.title = p.title.toLowerCase();
+    card.dataset.cat = p.cat;
+    card.dataset.year = p.year;
+    card.dataset.desc = p.desc.toLowerCase();
+    card.dataset.tags = p.tags.join(' ').toLowerCase();
+    card.style.animationDelay = `${i * 0.07}s`;
+
+    card.innerHTML = `
+      <div class="proj-thumb ${p.thumbClass}">
+        <div class="thumb-grid-lines"></div>
+        <div class="thumb-glow-el ${p.glowClass}"></div>
+        <div class="thumb-corner">
+          ${p.featured ? '<span class="featured-star">★</span>' : ''}
+          ${statusBadge(p)}
+        </div>
+        <div class="thumb-icon">${p.icon}</div>
+      </div>
+      <div class="proj-body">
+        <div class="proj-cat">${p.cat} · ${p.year}</div>
+        <div class="proj-title">${p.title}</div>
+        <div class="proj-desc">${p.desc}</div>
+        <div class="proj-tags">${tagHtml}</div>
+        <div class="proj-footer">
+          <div class="proj-date">📅 ${p.year}</div>
+          <div class="proj-links">
+            ${p.demo  ? `<a href="${p.demo}"  class="proj-link" onclick="event.stopPropagation()">↗ Demo</a>` : ''}
+            ${p.github? `<a href="${p.github}" class="proj-link" onclick="event.stopPropagation()">⌥ GitHub</a>` : ''}
+            <span class="proj-link" onclick="event.stopPropagation();openModal(${p.id})">⊕ Detail</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => openModal(p.id));
+    grid.insertBefore(card, emptyState);
+  });
+}
+
+/* ───────────── SEARCH + FILTER ───────────── */
+let activeFilter = 'Semua';
+let currentQuery = '';
+let currentSort  = 'default';
+
+function getFiltered() {
+  let list = [...projects];
+
+  // Filter kategori
+  if (activeFilter !== 'Semua') {
+    list = list.filter(p => p.cat === activeFilter);
+  }
+
+  // Search
+  if (currentQuery) {
+    const q = currentQuery.toLowerCase();
+    list = list.filter(p =>
+      p.title.toLowerCase().includes(q) ||
+      p.desc.toLowerCase().includes(q) ||
+      p.tags.some(t => t.toLowerCase().includes(q)) ||
+      p.cat.toLowerCase().includes(q)
+    );
+  }
+
+  // Sort
+  if (currentSort === 'name')    list.sort((a,b) => a.title.localeCompare(b.title));
+  if (currentSort === 'newest')  list.sort((a,b) => b.year - a.year);
+  if (currentSort === 'oldest')  list.sort((a,b) => a.year - b.year);
+
+  return list;
+}
+
+function applyFilters() {
+  const list = getFiltered();
+  renderCards(list);
+
+  // highlight
+  if (currentQuery) {
+    const q = currentQuery;
+    document.querySelectorAll('.proj-title, .proj-desc').forEach(el => {
+      el.innerHTML = el.innerHTML.replace(/<mark>/g,'').replace(/<\/mark>/g,'')
+        .replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>');
+    });
+    const meta = document.getElementById('searchMeta');
+    meta.innerHTML = list.length
+      ? `Menampilkan <em>${list.length}</em> dari <em>${projects.length}</em> proyek`
+      : '';
+  } else {
+    document.getElementById('searchMeta').innerHTML =
+      activeFilter !== 'Semua' ? `Kategori: <em>${activeFilter}</em> — <em>${list.length}</em> proyek` : '';
+  }
+}
+
+// Events
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentQuery = e.target.value.trim();
+  document.getElementById('searchClear').classList.toggle('show', currentQuery.length > 0);
+  applyFilters();
+});
+document.getElementById('searchClear').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  currentQuery = '';
+  document.getElementById('searchClear').classList.remove('show');
+  applyFilters();
+});
+document.getElementById('sortSelect').addEventListener('change', e => {
+  currentSort = e.target.value;
+  applyFilters();
+});
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeFilter = tab.dataset.cat;
+    applyFilters();
+  });
+});
+document.addEventListener('keydown', e => {
+  const inp = document.getElementById('searchInput');
+  if (e.key === '/' && document.activeElement !== inp) { e.preventDefault(); inp.focus(); }
+  if (e.key === 'Escape') {
+    if (document.getElementById('modalOverlay').classList.contains('open')) {
+      closeModal(null);
+    } else if (document.activeElement === inp) {
+      inp.value = ''; currentQuery = '';
+      document.getElementById('searchClear').classList.remove('show');
+      applyFilters(); inp.blur();
+    }
+  }
+});
+
+/* ───────────── MODAL ───────────── */
+function openModal(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('modalThumb').className = `modal-thumb ${p.thumbClass}`;
+  document.getElementById('modalGlow').className  = `thumb-glow-el ${p.glowClass}`;
+  document.getElementById('modalIcon').textContent = p.icon;
+  document.getElementById('modalTitle').textContent = p.title;
+
+  document.getElementById('modalTags').innerHTML = p.tags.map((t,j) =>
+    `<span class="proj-tag ${p.tagColors[j]||''}">${t}</span>`
+  ).join('');
+
+  document.getElementById('modalMeta').innerHTML = `
+    <div class="modal-meta-item">📁 ${p.cat}</div>
+    <div class="modal-meta-item">📅 ${p.year}</div>
+    <div class="modal-meta-item">${statusBadge(p)}</div>
+  `;
+
+  document.getElementById('modalDesc').textContent = p.desc;
+  document.getElementById('modalFeatures').innerHTML = p.features.map(f => `<li>${f}</li>`).join('');
+  document.getElementById('modalActions').innerHTML = `
+    ${p.demo   ? `<a href="${p.demo}"   class="btn-primary">↗ Lihat Demo</a>` : ''}
+    ${p.github ? `<a href="${p.github}" class="btn-outline">⌥ GitHub</a>` : ''}
+    ${!p.demo && !p.github ? `<span style="color:var(--muted);font-size:0.82rem;font-family:'DM Mono',monospace">Belum tersedia secara publik</span>` : ''}
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ───────────── CURSOR GLOW ───────────── */
+const glow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => {
+  glow.style.left = e.clientX + 'px';
+  glow.style.top  = e.clientY + 'px';
+});
+
+/* ───────────── INIT ───────────── */
+applyFilters();
+</script>
+</body>
+</html>
